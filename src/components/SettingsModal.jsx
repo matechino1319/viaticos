@@ -28,22 +28,27 @@ export const SettingsModal = ({
 
   const [applyPriceToAll, setApplyPriceToAll] = useState(true);
 
-  // Lista de usuarios local
-  const [userList, setUserList] = useState([...users]);
+  // Sincronizar automáticamente con la persona activa al abrir el modal
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedUserConfigId(activeUserId || users[0].id);
+      setUserList([...users]);
+    }
+  }, [isOpen, activeUserId, users]);
 
-  // Cargar configuración del usuario seleccionado
+  // Cargar configuración de los vehículos del usuario seleccionado en la pestaña
   useEffect(() => {
     const user = userList.find(u => u.id === selectedUserConfigId) || userList[0];
-    const uSettings = user.settings || settings;
+    const uSettings = user?.settings || settings;
 
-    setAutoNombre(uSettings.auto.nombre || 'Auto Particular');
-    setAutoKmPorLitro((uSettings.auto.kmPorLitro || 10).toString());
-    setAutoPrecio((uSettings.auto.precioPorLitro || 2450).toString());
+    setAutoNombre(uSettings.auto?.nombre || 'Auto Particular');
+    setAutoKmPorLitro((uSettings.auto?.kmPorLitro || 10).toString());
+    setAutoPrecio((uSettings.auto?.precioPorLitro || 2450).toString());
 
-    setMotoNombre(uSettings.moto.nombre || 'Motomel Tuning 110 blitz');
-    setMotoKmPorLitro((uSettings.moto.kmPorLitro || 20).toString());
-    setMotoPrecio((uSettings.moto.precioPorLitro || 2450).toString());
-  }, [selectedUserConfigId, isOpen]);
+    setMotoNombre(uSettings.moto?.nombre || 'Motomel Tuning 110 blitz');
+    setMotoKmPorLitro((uSettings.moto?.kmPorLitro || 20).toString());
+    setMotoPrecio((uSettings.moto?.precioPorLitro || 2450).toString());
+  }, [selectedUserConfigId, userList, settings]);
 
   const handleSaveAll = (e) => {
     e.preventDefault();

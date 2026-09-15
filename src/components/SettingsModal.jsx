@@ -27,12 +27,13 @@ export const SettingsModal = ({
   const [motoPrecio, setMotoPrecio] = useState('');
 
   const [applyPriceToAll, setApplyPriceToAll] = useState(true);
+  const [userList, setUserList] = useState(users || []);
 
   // Sincronizar automáticamente con la persona activa al abrir el modal
   useEffect(() => {
     if (isOpen) {
-      setSelectedUserConfigId(activeUserId || users[0].id);
-      setUserList([...users]);
+      setSelectedUserConfigId(activeUserId || (users && users[0]?.id));
+      setUserList(users || []);
     }
   }, [isOpen, activeUserId, users]);
 
@@ -113,7 +114,7 @@ export const SettingsModal = ({
     }));
   };
 
-  const selectedUserObj = userList.find(u => u.id === selectedUserConfigId) || userList[0];
+  const selectedUserObj = (userList && userList.find(u => u.id === selectedUserConfigId)) || (userList && userList[0]) || { name: 'Usuario' };
 
   return (
     <div className="modal-overlay animate-fade-in">

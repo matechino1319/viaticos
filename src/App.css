@@ -1955,3 +1955,285 @@
   }
 }
 
+/* =========================================================
+   TOPBAR DE MESES Y PERFIL ACTIVO
+   ========================================================= */
+.months-view-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.user-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.user-avatar-medium {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.profile-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-name {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.switch-user-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.switch-user-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.activity-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+}
+
+.month-card-footer-hover {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #38bdf8;
+  opacity: 0.8;
+  padding-top: 0.35rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+.month-card-item:hover .month-card-footer-hover {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+/* =========================================================
+   VISTA DETALLE DEL MES (MonthDetailView)
+   ========================================================= */
+.month-detail-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.month-detail-header-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: var(--shadow-md);
+}
+
+.month-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.month-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.month-calendar-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.month-subtitle-user {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+}
+
+.month-main-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.month-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.new-trip-highlight-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.3rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+
+.new-trip-highlight-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+/* =========================================================
+   POPUP MODAL DE CARGA DE VIAJE (TripModal)
+   ========================================================= */
+.trip-modal-box {
+  max-width: 520px;
+}
+
+.vehicle-badge-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vehicle-badge-icon.moto {
+  background: var(--moto-glow);
+  color: var(--moto-color);
+  border: 1px solid var(--moto-border);
+}
+
+.vehicle-badge-icon.auto {
+  background: var(--auto-glow);
+  color: #60a5fa;
+  border: 1px solid var(--auto-border);
+}
+
+.big-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.big-toggle .vehicle-toggle-btn {
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.big-toggle .btn-text-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.big-toggle .btn-text-block strong {
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+}
+
+.big-toggle .btn-text-block span {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.big-toggle .vehicle-toggle-btn.btn-moto.active {
+  background: var(--moto-glow);
+  color: var(--moto-color);
+  border-color: var(--moto-border);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
+}
+
+.big-toggle .vehicle-toggle-btn.btn-auto.active {
+  background: var(--auto-glow);
+  color: #60a5fa;
+  border-color: var(--auto-border);
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.3);
+}

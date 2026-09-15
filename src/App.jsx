@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from './components/Header';
 import { UserSelectionScreen } from './components/UserSelectionScreen';
 import { YearMonthGrid } from './components/YearMonthGrid';
-import { MonthSelector } from './components/MonthSelector';
-import { SummaryCards } from './components/SummaryCards';
-import { TripForm } from './components/TripForm';
-import { TripTable } from './components/TripTable';
+import { MonthDetailView } from './components/MonthDetailView';
+import { TripModal } from './components/TripModal';
 import { SettingsModal } from './components/SettingsModal';
 import { PrintReportModal } from './components/PrintReportModal';
 import { ExportModal } from './components/ExportModal';
@@ -29,22 +27,18 @@ export function App() {
   const [activeUserId, setActiveUserId] = useState(initialData.activeUserId);
   const [selectedMonth, setSelectedMonth] = useState(initialData.selectedMonth);
 
-  // Vista activa: 'user_select' | 'dashboard'
-  const [view, setView] = useState(() => {
-    // Si viene de una sesión previa, podemos arrancar en el dashboard o selector
-    return 'dashboard';
-  });
+  // Navegación por pasos: 'user_select' | 'months_grid' | 'month_detail'
+  const [step, setStep] = useState('user_select');
 
   // Modales
+  const [isTripModalOpen, setIsTripModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [printMonth, setPrintMonth] = useState(selectedMonth);
   const [editingTrip, setEditingTrip] = useState(null);
 
-  const formSectionRef = useRef(null);
-
-  // Persistencia reactiva
+  // Persistencia
   useEffect(() => {
     saveUsers(users);
   }, [users]);
@@ -87,20 +81,7 @@ export function App() {
     });
   }, [trips, activeUserId, printMonth]);
 
-  // Lista de meses con actividad del usuario activo
-  const availableMonths = useMemo(() => {
-    const monthSet = new Set(['2026-08', '2026-09']);
-    trips
-      .filter((t) => t.usuarioId === activeUserId)
-      .forEach((t) => {
-        if (t.fecha) {
-          monthSet.add(t.fecha.slice(0, 7));
-        }
-      });
-    return Array.from(monthSet).sort().reverse();
-  }, [trips, activeUserId]);
-
-  // Destinos frecuentes
+  // Destinos frecuentes para el usuario
   const commonDestinations = useMemo(() => {
     const list = trips
       .filter((t) => t.usuarioId === activeUserId)
@@ -129,9 +110,14 @@ export function App() {
   }, [currentMonthTrips, settings.auto]);
 
   // Handlers
-  const handleSelectUserFromWelcome = (userId) => {
+  const handleSelectUser = (userId) => {
     setActiveUserId(userId);
-    setView('dashboard');
+    setStep('months_grid');
+  };
+
+  const handleSelectMonth = (monthStr) => {
+    setSelectedMonth(monthStr);
+    setStep('month_detail');
   };
 
   const handleAddTrip = (tripData) => {
@@ -154,9 +140,7 @@ export function App() {
 
   const handleEditTrip = (trip) => {
     setEditingTrip(trip);
-    if (formSectionRef.current) {
-      formSectionRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    setIsTripModalOpen(true);
   };
 
   const handleDeleteTrip = (tripId) => {
@@ -176,6 +160,7 @@ export function App() {
       setActiveUserId(DEFAULT_USERS[0].id);
       setSelectedMonth('2026-08');
       setIsSettingsOpen(false);
+      setStep('user_select');
     }
   };
 
@@ -197,85 +182,81 @@ export function App() {
 
   return (
     <div className="app-container">
-      {/* Header General */}
+      {/* Header global accesible */}
       <Header
         users={users}
         activeUserId={activeUserId}
         onSelectUser={(id) => {
           setActiveUserId(id);
-          setView('dashboard');
+          setStep('months_grid');
         }}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenExport={() => setIsExportOpen(true)}
         onExportBackup={handleExportBackup}
-        onOpenUserSelection={() => setView('user_select')}
+        onOpenUserSelection={() => setStep('user_select')}
       />
 
       <main className="main-content">
-        {view === 'user_select' ? (
-          /* Pantalla Inicial de Selección de Quién Sos */
+        {/* PASO 1: Elegir quién sos */}
+        {step === 'user_select' && (
           <UserSelectionScreen
             users={users}
             trips={trips}
             settings={settings}
-            onSelectUser={handleSelectUserFromWelcome}
+            onSelectUser={handleSelectUser}
             onOpenSettings={() => setIsSettingsOpen(true)}
           />
-        ) : (
-          /* Dashboard Principal del Usuario Activo */
-          <>
-            {/* Grilla con los 12 Meses del Año para elegir el mes */}
-            <YearMonthGrid
-              selectedMonth={selectedMonth}
-              onChangeMonth={setSelectedMonth}
-              trips={trips}
-              activeUserId={activeUserId}
-              settings={settings}
-              onSelectMonthAndScroll={() => {
-                if (formSectionRef.current) {
-                  formSectionRef.current.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-            />
+        )}
 
-            {/* Barra de Navegación Rápida del Mes Activo */}
-            <MonthSelector
-              selectedMonth={selectedMonth}
-              onChangeMonth={setSelectedMonth}
-              availableMonths={availableMonths}
-            />
+        {/* PASO 2: Elegir mes del año */}
+        {step === 'months_grid' && (
+          <YearMonthGrid
+            selectedMonth={selectedMonth}
+            onSelectMonth={handleSelectMonth}
+            trips={trips}
+            activeUser={activeUser}
+            settings={settings}
+            onChangeUser={() => setStep('user_select')}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+            onOpenExport={() => setIsExportOpen(true)}
+          />
+        )}
 
-            {/* Tarjetas de Resumen del Mes (Moto, Auto, Total a Liquidar) */}
-            <SummaryCards
-              motoStats={motoStats}
-              autoStats={autoStats}
-              settings={settings}
-              activeUserName={activeUser?.name}
-            />
-
-            {/* Formulario de Carga del Día / Viaje (Auto / Moto, KM, Detalle) */}
-            <div ref={formSectionRef}>
-              <TripForm
-                onAddTrip={handleAddTrip}
-                selectedMonth={selectedMonth}
-                editingTrip={editingTrip}
-                onCancelEdit={() => setEditingTrip(null)}
-                commonDestinations={commonDestinations}
-              />
-            </div>
-
-            {/* Tabla Detallada de Viajes del Mes */}
-            <TripTable
-              trips={currentMonthTrips}
-              settings={settings}
-              onEditTrip={handleEditTrip}
-              onDeleteTrip={handleDeleteTrip}
-            />
-          </>
+        {/* PASO 3: Detalle del mes, registrar viajes por día en Auto/Moto y liquidación */}
+        {step === 'month_detail' && (
+          <MonthDetailView
+            selectedMonth={selectedMonth}
+            activeUser={activeUser}
+            trips={currentMonthTrips}
+            settings={settings}
+            motoStats={motoStats}
+            autoStats={autoStats}
+            onBackToMonths={() => setStep('months_grid')}
+            onOpenTripModal={() => {
+              setEditingTrip(null);
+              setIsTripModalOpen(true);
+            }}
+            onEditTrip={handleEditTrip}
+            onDeleteTrip={handleDeleteTrip}
+            onOpenExport={() => setIsExportOpen(true)}
+          />
         )}
       </main>
 
-      {/* Modal de Configuración (Auto/Moto KM/L y $/L, Nombres de Integrantes) */}
+      {/* POPUP / MODAL: Registrar Viaje / Día (Auto o Moto y KM) */}
+      <TripModal
+        isOpen={isTripModalOpen}
+        onClose={() => {
+          setIsTripModalOpen(false);
+          setEditingTrip(null);
+        }}
+        onAddTrip={handleAddTrip}
+        selectedMonth={selectedMonth}
+        editingTrip={editingTrip}
+        commonDestinations={commonDestinations}
+      />
+
+      {/* MODAL: Configuración de Rendimiento y Precios de Combustible */}
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
@@ -286,7 +267,7 @@ export function App() {
         onResetData={handleResetData}
       />
 
-      {/* Modal de Exportación a Excel / PDF con selector de mes */}
+      {/* MODAL: Exportar a Excel y PDF */}
       <ExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
@@ -298,7 +279,7 @@ export function App() {
         onOpenPrintModal={handleOpenPrintFromExport}
       />
 
-      {/* Modal de Planilla Formal Imprimible / PDF */}
+      {/* MODAL: Planilla Formal Imprimible / PDF */}
       <PrintReportModal
         isOpen={isPrintOpen}
         onClose={() => setIsPrintOpen(false)}

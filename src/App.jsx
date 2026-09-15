@@ -89,25 +89,30 @@ export function App() {
     return Array.from(new Set(list));
   }, [trips, activeUserId]);
 
+  // Configuración específica del usuario activo (o global por defecto)
+  const userSettings = useMemo(() => {
+    return activeUser?.settings || settings;
+  }, [activeUser, settings]);
+
   // Estadísticas MOTO para el mes seleccionado
   const motoStats = useMemo(() => {
     const motoTrips = currentMonthTrips.filter((t) => t.tipoVehiculo === 'moto');
     const km = motoTrips.reduce((acc, t) => acc + (t.km || 0), 0);
-    const kmPorLitro = settings.moto.kmPorLitro || 20;
+    const kmPorLitro = userSettings.moto?.kmPorLitro || 20;
     const litros = km / kmPorLitro;
-    const subtotal = litros * settings.moto.precioPorLitro;
+    const subtotal = litros * (userSettings.moto?.precioPorLitro || 2450);
     return { km, litros, subtotal, count: motoTrips.length };
-  }, [currentMonthTrips, settings.moto]);
+  }, [currentMonthTrips, userSettings.moto]);
 
   // Estadísticas AUTO para el mes seleccionado
   const autoStats = useMemo(() => {
     const autoTrips = currentMonthTrips.filter((t) => t.tipoVehiculo === 'auto');
     const km = autoTrips.reduce((acc, t) => acc + (t.km || 0), 0);
-    const kmPorLitro = settings.auto.kmPorLitro || 10;
+    const kmPorLitro = userSettings.auto?.kmPorLitro || 10;
     const litros = km / kmPorLitro;
-    const subtotal = litros * settings.auto.precioPorLitro;
+    const subtotal = litros * (userSettings.auto?.precioPorLitro || 2450);
     return { km, litros, subtotal, count: autoTrips.length };
-  }, [currentMonthTrips, settings.auto]);
+  }, [currentMonthTrips, userSettings.auto]);
 
   // Handlers
   const handleSelectUser = (userId) => {
@@ -228,7 +233,7 @@ export function App() {
             selectedMonth={selectedMonth}
             activeUser={activeUser}
             trips={currentMonthTrips}
-            settings={settings}
+            settings={userSettings}
             motoStats={motoStats}
             autoStats={autoStats}
             onBackToMonths={() => setStep('months_grid')}
@@ -260,11 +265,12 @@ export function App() {
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        settings={settings}
+        settings={userSettings}
         onSaveSettings={setSettings}
         users={users}
         onSaveUsers={setUsers}
         onResetData={handleResetData}
+        activeUserId={activeUserId}
       />
 
       {/* MODAL: Exportar a Excel y PDF */}

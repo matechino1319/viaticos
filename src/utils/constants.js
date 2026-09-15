@@ -1,15 +1,8 @@
-// Configuración inicial y datos por defecto
-
-export const DEFAULT_USERS = [
-  { id: 'user-1', name: 'Mateo Martinez', initials: 'MM', avatarColor: '#3b82f6' },
-  { id: 'user-2', name: 'Gonza', initials: 'GO', avatarColor: '#10b981' },
-  { id: 'user-3', name: 'Fede', initials: 'FE', avatarColor: '#f59e0b' },
-  { id: 'user-4', name: 'Diego', initials: 'DI', avatarColor: '#8b5cf6' }
-];
+// Configuración inicial y datos por defecto con configuraciones individuales por persona
 
 export const DEFAULT_SETTINGS = {
   auto: {
-    nombre: 'Auto General (ej. Peugeot / Fiat)',
+    nombre: 'Auto General',
     kmPorLitro: 10,
     precioPorLitro: 2450.00
   },
@@ -20,7 +13,50 @@ export const DEFAULT_SETTINGS = {
   }
 };
 
-// Viajes precargados iniciales (tomados directamente de la planilla provista)
+export const DEFAULT_USERS = [
+  {
+    id: 'user-1',
+    name: 'Mateo Martinez',
+    initials: 'MM',
+    avatarColor: '#2563eb',
+    settings: {
+      auto: { nombre: 'Auto Particular', kmPorLitro: 10, precioPorLitro: 2450.00 },
+      moto: { nombre: 'Motomel Tuning 110 blitz', kmPorLitro: 20, precioPorLitro: 2450.00 }
+    }
+  },
+  {
+    id: 'user-2',
+    name: 'Gonza',
+    initials: 'GO',
+    avatarColor: '#059669',
+    settings: {
+      auto: { nombre: 'Auto Particular', kmPorLitro: 10, precioPorLitro: 2450.00 },
+      moto: { nombre: 'Moto', kmPorLitro: 20, precioPorLitro: 2450.00 }
+    }
+  },
+  {
+    id: 'user-3',
+    name: 'Fede',
+    initials: 'FE',
+    avatarColor: '#d97706',
+    settings: {
+      auto: { nombre: 'Auto Particular', kmPorLitro: 10, precioPorLitro: 2450.00 },
+      moto: { nombre: 'Moto', kmPorLitro: 20, precioPorLitro: 2450.00 }
+    }
+  },
+  {
+    id: 'user-4',
+    name: 'Diego',
+    initials: 'DI',
+    avatarColor: '#7c3aed',
+    settings: {
+      auto: { nombre: 'Auto Particular', kmPorLitro: 10, precioPorLitro: 2450.00 },
+      moto: { nombre: 'Moto', kmPorLitro: 20, precioPorLitro: 2450.00 }
+    }
+  }
+];
+
+// Viajes precargados iniciales
 export const INITIAL_TRIPS = [
   {
     id: 'trip-1',

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Bike, Car, Users, Save, RotateCcw, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Bike, Car, Users, Save, RotateCcw, Check, Fuel } from 'lucide-react';
 import { DEFAULT_SETTINGS, DEFAULT_USERS } from '../utils/constants';
 
 export const SettingsModal = ({
@@ -9,42 +9,89 @@ export const SettingsModal = ({
   onSaveSettings,
   users,
   onSaveUsers,
-  onResetData
+  onResetData,
+  activeUserId
 }) => {
   if (!isOpen) return null;
 
+  const [selectedUserConfigId, setSelectedUserConfigId] = useState(activeUserId || users[0].id);
   const [activeTab, setActiveTab] = useState('vehicles'); // 'vehicles' | 'users'
 
   // Estados locales para vehículos
-  const [autoNombre, setAutoNombre] = useState(settings.auto.nombre);
-  const [autoKmPorLitro, setAutoKmPorLitro] = useState(settings.auto.kmPorLitro.toString());
-  const [autoPrecio, setAutoPrecio] = useState(settings.auto.precioPorLitro.toString());
+  const [autoNombre, setAutoNombre] = useState('');
+  const [autoKmPorLitro, setAutoKmPorLitro] = useState('');
+  const [autoPrecio, setAutoPrecio] = useState('');
 
-  const [motoNombre, setMotoNombre] = useState(settings.moto.nombre);
-  const [motoKmPorLitro, setMotoKmPorLitro] = useState(settings.moto.kmPorLitro.toString());
-  const [motoPrecio, setMotoPrecio] = useState(settings.moto.precioPorLitro.toString());
+  const [motoNombre, setMotoNombre] = useState('');
+  const [motoKmPorLitro, setMotoKmPorLitro] = useState('');
+  const [motoPrecio, setMotoPrecio] = useState('');
 
-  // Estados locales para usuarios
+  const [applyPriceToAll, setApplyPriceToAll] = useState(true);
+
+  // Lista de usuarios local
   const [userList, setUserList] = useState([...users]);
+
+  // Cargar configuración del usuario seleccionado
+  useEffect(() => {
+    const user = userList.find(u => u.id === selectedUserConfigId) || userList[0];
+    const uSettings = user.settings || settings;
+
+    setAutoNombre(uSettings.auto.nombre || 'Auto Particular');
+    setAutoKmPorLitro((uSettings.auto.kmPorLitro || 10).toString());
+    setAutoPrecio((uSettings.auto.precioPorLitro || 2450).toString());
+
+    setMotoNombre(uSettings.moto.nombre || 'Motomel Tuning 110 blitz');
+    setMotoKmPorLitro((uSettings.moto.kmPorLitro || 20).toString());
+    setMotoPrecio((uSettings.moto.precioPorLitro || 2450).toString());
+  }, [selectedUserConfigId, isOpen]);
 
   const handleSaveAll = (e) => {
     e.preventDefault();
 
-    const newSettings = {
+    const priceAutoVal = parseFloat(autoPrecio) || 2450;
+    const priceMotoVal = parseFloat(motoPrecio) || 2450;
+
+    const userSpecificSettings = {
       auto: {
         nombre: autoNombre.trim() || 'Auto',
         kmPorLitro: parseFloat(autoKmPorLitro) || 10,
-        precioPorLitro: parseFloat(autoPrecio) || 2450
+        precioPorLitro: priceAutoVal
       },
       moto: {
         nombre: motoNombre.trim() || 'Moto',
         kmPorLitro: parseFloat(motoKmPorLitro) || 20,
-        precioPorLitro: parseFloat(motoPrecio) || 2450
+        precioPorLitro: priceMotoVal
       }
     };
 
-    onSaveSettings(newSettings);
-    onSaveUsers(userList);
+    // Actualizar usuarios con sus configuraciones individuales
+    const updatedUsers = userList.map(u => {
+      if (u.id === selectedUserConfigId) {
+        return {
+          ...u,
+          settings: userSpecificSettings
+        };
+      }
+      if (applyPriceToAll && u.settings) {
+        return {
+          ...u,
+          settings: {
+            ...u.settings,
+            auto: { ...u.settings.auto, precioPorLitro: priceAutoVal },
+            moto: { ...u.settings.moto, precioPorLitro: priceMotoVal }
+          }
+        };
+      }
+      return u;
+    });
+
+    onSaveUsers(updatedUsers);
+
+    // Si el usuario configurado es el activo, actualizar settings global también
+    if (selectedUserConfigId === activeUserId) {
+      onSaveSettings(userSpecificSettings);
+    }
+
     onClose();
   };
 
@@ -61,11 +108,16 @@ export const SettingsModal = ({
     }));
   };
 
+  const selectedUserObj = userList.find(u => u.id === selectedUserConfigId) || userList[0];
+
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay animate-fade-in">
       <div className="modal-container settings-modal-box">
         <div className="modal-header">
-          <h2 className="modal-title">Configuración del Sistema</h2>
+          <div>
+            <h2 className="modal-title">Configuración de Vehículos y Tarifas</h2>
+            <p className="modal-subtitle">Ajustá el rendimiento y precio de combustible por integrante</p>
+          </div>
           <button onClick={onClose} className="modal-close-btn" title="Cerrar">
             <X size={20} />
           </button>
@@ -78,7 +130,7 @@ export const SettingsModal = ({
             onClick={() => setActiveTab('vehicles')}
           >
             <Car size={16} />
-            <span>Vehículos y Tarifas de Nafta</span>
+            <span>Vehículos y Rendimiento</span>
           </button>
           <button
             type="button"
@@ -86,13 +138,38 @@ export const SettingsModal = ({
             onClick={() => setActiveTab('users')}
           >
             <Users size={16} />
-            <span>Integrantes (4 personas)</span>
+            <span>Nombres de Integrantes</span>
           </button>
         </div>
 
         <form onSubmit={handleSaveAll} className="modal-form">
           {activeTab === 'vehicles' && (
             <div className="tab-content animate-fade-in">
+              {/* Selector de para qué persona configurar */}
+              <div className="form-group full-width">
+                <label className="input-label font-bold">
+                  Configurar parámetros para:
+                </label>
+                <div className="user-chips-selector">
+                  {userList.map(u => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => setSelectedUserConfigId(u.id)}
+                      className={`user-chip-btn ${selectedUserConfigId === u.id ? 'active' : ''}`}
+                    >
+                      <div className="chip-avatar" style={{ backgroundColor: u.avatarColor || '#2563eb' }}>
+                        {u.initials || u.name.slice(0, 2)}
+                      </div>
+                      <span>{u.name}</span>
+                    </button>
+                  ))}
+                </div>
+                <span className="field-hint text-blue">
+                  ℹ️ Modificar el rendimiento en km/l se aplica individualmente a <strong>{selectedUserObj.name}</strong> y no altera a los demás.
+                </span>
+              </div>
+
               {/* Sección MOTO */}
               <div className="settings-section moto-section">
                 <div className="section-title-wrap">
@@ -100,14 +177,14 @@ export const SettingsModal = ({
                     <Bike size={20} />
                   </div>
                   <div>
-                    <h4 className="section-title">Parámetros para MOTO</h4>
-                    <p className="section-desc">Rendimiento y costo de combustible por litro</p>
+                    <h4 className="section-title">MOTO ({selectedUserObj.name})</h4>
+                    <p className="section-desc">Rendimiento en km/l y precio por litro</p>
                   </div>
                 </div>
 
                 <div className="settings-fields-grid">
                   <div className="form-group full-width">
-                    <label className="input-label">Descripción / Modelo de Moto:</label>
+                    <label className="input-label">Modelo / Nombre de Moto:</label>
                     <input
                       type="text"
                       value={motoNombre}
@@ -133,7 +210,7 @@ export const SettingsModal = ({
                   </div>
 
                   <div className="form-group">
-                    <label className="input-label">Precio Nafta ($ por Litro):</label>
+                    <label className="input-label">Precio Nafta ($ / Litro):</label>
                     <input
                       type="number"
                       step="0.01"
@@ -155,19 +232,19 @@ export const SettingsModal = ({
                     <Car size={20} />
                   </div>
                   <div>
-                    <h4 className="section-title">Parámetros para AUTO</h4>
-                    <p className="section-desc">Rendimiento y costo de combustible por litro</p>
+                    <h4 className="section-title">AUTO ({selectedUserObj.name})</h4>
+                    <p className="section-desc">Rendimiento en km/l y precio por litro</p>
                   </div>
                 </div>
 
                 <div className="settings-fields-grid">
                   <div className="form-group full-width">
-                    <label className="input-label">Descripción / Modelo de Auto:</label>
+                    <label className="input-label">Modelo / Nombre de Auto:</label>
                     <input
                       type="text"
                       value={autoNombre}
                       onChange={(e) => setAutoNombre(e.target.value)}
-                      placeholder="Ej. Auto Particular / Peugeot 208"
+                      placeholder="Ej. Auto Particular"
                       className="custom-input"
                       required
                     />
@@ -188,7 +265,7 @@ export const SettingsModal = ({
                   </div>
 
                   <div className="form-group">
-                    <label className="input-label">Precio Nafta ($ por Litro):</label>
+                    <label className="input-label">Precio Nafta ($ / Litro):</label>
                     <input
                       type="number"
                       step="0.01"
@@ -201,6 +278,18 @@ export const SettingsModal = ({
                     <span className="field-hint">Ejemplo: $ 2.450,00</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Checkbox compartir precio de nafta */}
+              <div className="checkbox-option-row">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={applyPriceToAll}
+                    onChange={(e) => setApplyPriceToAll(e.target.checked)}
+                  />
+                  <span>Actualizar el precio $/L de nafta para todos los integrantes</span>
+                </label>
               </div>
             </div>
           )}
@@ -236,7 +325,7 @@ export const SettingsModal = ({
               title="Restablecer datos originales"
             >
               <RotateCcw size={15} />
-              <span>Restablecer Ejemplo</span>
+              <span>Restablecer Todo</span>
             </button>
 
             <div className="primary-actions-group">
@@ -245,7 +334,7 @@ export const SettingsModal = ({
               </button>
               <button type="submit" className="btn-save">
                 <Save size={16} />
-                <span>Guardar Cambios</span>
+                <span>Guardar Configuración</span>
               </button>
             </div>
           </div>

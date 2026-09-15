@@ -16,8 +16,19 @@ export const loadData = () => {
     const savedActiveUser = localStorage.getItem(STORAGE_KEYS.ACTIVE_USER);
     const savedSelectedMonth = localStorage.getItem(STORAGE_KEYS.SELECTED_MONTH);
 
+    let parsedUsers = savedUsers ? JSON.parse(savedUsers) : DEFAULT_USERS;
+    // Migración automática si los usuarios tenían nombres genéricos
+    if (parsedUsers && parsedUsers.length === 4) {
+      parsedUsers = parsedUsers.map((u, i) => {
+        if (u.name.startsWith('Persona ')) {
+          return DEFAULT_USERS[i];
+        }
+        return u;
+      });
+    }
+
     return {
-      users: savedUsers ? JSON.parse(savedUsers) : DEFAULT_USERS,
+      users: parsedUsers,
       settings: savedSettings ? JSON.parse(savedSettings) : DEFAULT_SETTINGS,
       trips: savedTrips ? JSON.parse(savedTrips) : INITIAL_TRIPS,
       activeUserId: savedActiveUser || DEFAULT_USERS[0].id,

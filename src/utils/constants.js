@@ -2,9 +2,9 @@
 
 export const DEFAULT_USERS = [
   { id: 'user-1', name: 'Mateo Martinez', initials: 'MM', avatarColor: '#3b82f6' },
-  { id: 'user-2', name: 'Persona 2', initials: 'P2', avatarColor: '#10b981' },
-  { id: 'user-3', name: 'Persona 3', initials: 'P3', avatarColor: '#f59e0b' },
-  { id: 'user-4', name: 'Persona 4', initials: 'P4', avatarColor: '#8b5cf6' }
+  { id: 'user-2', name: 'Gonza', initials: 'GO', avatarColor: '#10b981' },
+  { id: 'user-3', name: 'Fede', initials: 'FE', avatarColor: '#f59e0b' },
+  { id: 'user-4', name: 'Diego', initials: 'DI', avatarColor: '#8b5cf6' }
 ];
 
 export const DEFAULT_SETTINGS = {

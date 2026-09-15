@@ -1,22 +1,21 @@
 import React from 'react';
-import { Fuel, Settings, Printer, Download, Users, PlusCircle } from 'lucide-react';
-import { formatCurrency } from '../utils/storage';
+import { Fuel, Settings, FileSpreadsheet, Download, Users, ArrowLeftRight } from 'lucide-react';
 
 export const Header = ({
   users,
   activeUserId,
   onSelectUser,
   onOpenSettings,
-  onOpenPrint,
+  onOpenExport,
   onExportBackup,
-  totalMonthAmount
+  onOpenUserSelection
 }) => {
   const activeUser = users.find(u => u.id === activeUserId) || users[0];
 
   return (
     <header className="header-container no-print">
       <div className="header-top">
-        <div className="brand-group">
+        <div className="brand-group" onClick={onOpenUserSelection} style={{ cursor: 'pointer' }} title="Volver a selección de integrante">
           <div className="brand-icon">
             <Fuel size={24} className="icon-pulse" />
           </div>
@@ -27,40 +26,52 @@ export const Header = ({
         </div>
 
         <div className="header-actions">
+          {/* Botón para cambiar de usuario */}
           <button 
-            className="action-btn secondary"
-            onClick={onExportBackup}
-            title="Descargar copia de seguridad en JSON"
+            className="action-btn secondary switch-user-btn"
+            onClick={onOpenUserSelection}
+            title="Cambiar de persona"
           >
-            <Download size={17} />
-            <span className="btn-label">Copia de Seguridad</span>
+            <ArrowLeftRight size={17} />
+            <span className="btn-label">Cambiar Persona</span>
           </button>
 
+          {/* Botón Exportar Reporte (Excel / PDF) */}
           <button 
-            className="action-btn secondary"
-            onClick={onOpenPrint}
-            title="Vista de impresión y liquidación formal"
+            className="action-btn export-btn-highlight"
+            onClick={onOpenExport}
+            title="Exportar reporte del mes a Excel o PDF"
           >
-            <Printer size={17} />
-            <span className="btn-label">Planilla Formal</span>
+            <FileSpreadsheet size={17} />
+            <span className="btn-label">Exportar Reporte</span>
           </button>
 
+          {/* Botón Configuración de Tarifas y KM/L */}
           <button 
             className="action-btn primary"
             onClick={onOpenSettings}
-            title="Configurar precios de nafta, rendimientos y usuarios"
+            title="Configurar precios de nafta, rendimientos y vehículos"
           >
             <Settings size={17} />
             <span>Configuración</span>
           </button>
+
+          {/* Botón Copia de Seguridad */}
+          <button 
+            className="action-btn icon-only-btn"
+            onClick={onExportBackup}
+            title="Descargar copia de seguridad en JSON"
+          >
+            <Download size={17} />
+          </button>
         </div>
       </div>
 
-      {/* Selector de los 4 Usuarios */}
+      {/* Selector de los 4 Integrantes */}
       <div className="user-selector-bar">
         <div className="selector-label">
           <Users size={16} />
-          <span>Persona:</span>
+          <span>Persona activa:</span>
         </div>
         <div className="user-pills">
           {users.map((user) => {
